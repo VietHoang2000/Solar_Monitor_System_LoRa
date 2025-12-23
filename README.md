@@ -72,11 +72,12 @@ cd Solar_Monitor_System_LoRa
 4. Cài đặt Dependencies (Python)
 ```bash
 pip install flask mysql-connector-python pyserial
+pip install ngrok
 ```
 5. Chạy ứng dụng
 ```bash
 cd Solar_Monitoring_Project
-python app.py
+python app_to_sql.py
 ```
 - Truy cập Dashboard: http://localhost:5000
 ## 📊 Kết quả Thực nghiệm
