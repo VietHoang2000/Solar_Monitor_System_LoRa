@@ -1,98 +1,115 @@
-# ☀️ Solar Monitor & Auto-Cleaning System (LoRaWAN IoT)
+# ☀️ Hệ thống IoT Giám sát & Vệ sinh Pin Mặt trời (LoRaWAN)
 
-![Device](https://img.shields.io/badge/Device-Heltec_WiFi_LoRa_32_V3-blue?style=for-the-badge&logo=arduino)
-![Platform](https://img.shields.io/badge/Platform-Python_Flask-yellow?style=for-the-badge&logo=python)
-![Database](https://img.shields.io/badge/Database-MySQL_XAMPP-orange?style=for-the-badge&logo=mysql)
-![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
-
-> **Đồ án Tốt nghiệp Kỹ sư Công nghệ Thông tin**
-> * **Sinh viên:** Vũ Việt Hoàng - 20050032
-> * **GVHD:** ThS. Lê Duy Hùng
-> * **Trường:** Đại học Bình Dương
+&nbsp;  
+**Đồ án tốt nghiệp** - Sinh viên: **Vũ Việt Hoàng (20050032)**
+**Trường Đại học Bình Dương**
 
 ---
 
-## 📖 Giới thiệu (Overview)
+## 📋 Giới thiệu
 
-Hệ thống **IoT Giám sát và Tự động vệ sinh tấm pin năng lượng mặt trời** là giải pháp công nghệ nhằm giải quyết vấn đề suy hao hiệu suất điện năng do bụi bẩn. Hệ thống sử dụng công nghệ giao tiếp vô tuyến tầm xa **LoRa** (Long Range) để truyền dữ liệu từ các Node cảm biến ngoài trời về trung tâm giám sát, khắc phục nhược điểm về khoảng cách của WiFi.
+Hệ thống **Solar Monitor System LoRa** là giải pháp IoT tích hợp giám sát hiệu suất và tự động vệ sinh tấm pin năng lượng mặt trời. Hệ thống giải quyết bài toán suy hao năng lượng do bụi bẩn tại các khu vực rộng lớn bằng cách sử dụng công nghệ giao tiếp vô tuyến tầm xa **LoRa** và thuật toán vệ sinh tự động thông minh.
 
-### 🚀 Chức năng chính:
-1.  **Giám sát thời gian thực (Real-time Monitoring):**
-    * Đo dòng điện (A), Điện áp (V), Công suất (W) từ tấm pin.
-    * Đo nồng độ bụi trong không khí (mg/m³).
-2.  **Vệ sinh tự động (Smart Cleaning):**
-    * Tự động kích hoạt động cơ chổi quét khi nồng độ bụi vượt ngưỡng cài đặt.
-3.  **Điều khiển từ xa (Remote Control):**
-    * Cho phép người dùng bật/tắt chế độ vệ sinh thủ công qua Web Dashboard.
-4.  **Báo cáo & Lưu trữ:**
-    * Lưu lịch sử dữ liệu vào MySQL để phân tích hiệu suất theo thời gian.
+## Điểm nổi bật
 
----
+* 📡 **LoRa Communication:** Truyền dữ liệu không dây tầm xa (Long Range), tiết kiệm năng lượng, thay thế WiFi ở khu vực hẻo lánh.
+* ⚡ **Real-time Monitoring:** Giám sát thời gian thực các chỉ số: Dòng điện (A), Điện áp (V), Công suất (W).
+* 🌪️ **Smart Dust Detection:** Cảm biến bụi quang học phát hiện nồng độ bụi ($mg/m^3$) chính xác.
+* 🤖 **Auto-Cleaning Mode:** Tự động kích hoạt cơ chế chổi quét khi bụi vượt ngưỡng cài đặt.
+* 📊 **Web Dashboard:** Giao diện trực quan, vẽ biểu đồ và xuất báo cáo lịch sử hoạt động.
 
-## 📂 Cấu trúc dự án (Project Structure)
+## 🏗️ Kiến trúc hệ thống
+![Sơ Đồ Kiến Trúc Hệ Thống](Pic_Demo&Diagram/so_do_bo_tri_phan_cung.jpg)
+## 🛠️ Công nghệ sử dụng
 
-Dưới đây là cấu trúc thư mục của Source Code:
+| Hạng mục | Công nghệ / Thiết bị |
+| :--- | :--- |
+| **Vi điều khiển (MCU)** | ESP32 (Heltec WiFi LoRa 32 V3) |
+| **Giao tiếp không dây** | LoRaWAN (SX1262), WiFi |
+| **Cảm biến (Sensors)** | INA219 (Dòng/Áp), Sharp GP2Y10 (Bụi) |
+| **Cơ cấu chấp hành** | Động cơ DC giảm tốc + Driver L298N |
+| **Backend Server** | Python (Flask Framework), Ngrok |
+| **Database** | MySQL (XAMPP - phpMyAdmin) |
+| **Frontend** | HTML5, CSS3, JavaScript (Chart.js) |
+| **IDE & Tools** | Arduino IDE, VS Code, Git |
+
+## 📁 Cấu trúc thư mục
 
 ```text
 VuVietHoang-20050032-23TH01/
 ├── Solar_Monitoring_Project/           # [MAIN] Thư mục chứa Source Code chính
-    ├── esp32-lora/                     # Code Firmware cho mạch Heltec V3 (Arduino)
-    │   └── Solar_Node.ino              # File code nạp cho ESP32
-    ├── static/                         # Tài nguyên Frontend (CSS, JS, Images)
-    ├── templates/                      # Giao diện HTML (Dashboard)
-    └── index.html
-    ├── app.py                          # Web Server (Python Flask Backend)
-    └── database.sql                    # File cấu trúc CSDL MySQL (Nếu có)
+|   ├──Pic_Demo/                        # Hình ảnh demo dự án
+|   |   ├── Solar_Model.JPG
+|   |   ├── UI_Dashboard.JPG
+|   |   └── UI_Dashboard_2.JPG
+│   ├── esp32-lora/                     # Code Firmware cho mạch Heltec V3 (Arduino)
+│   │   └── Solar_Node.ino              # File code nạp cho ESP32
+│   ├── static/                         # Tài nguyên Frontend (CSS, JS, Images)
+│   ├── templates/                      # Giao diện HTML (Dashboard)
+│   │   └── index.html
+│   ├── app.py                          # Web Server (Python Flask Backend)
+│   └── database.sql                    # File cấu trúc CSDL MySQL (Nếu có)
 ```
-🛠️ Yêu cầu hệ thống (Prerequisites)
-Để chạy được dự án này, bạn cần chuẩn bị:
+## 🚀 Hướng dẫn cài đặt
 
-1. Phần cứng (Hardware)
-- Vi điều khiển: Heltec WiFi LoRa 32 V3.
-- Cảm biến: INA219 (Dòng/Áp), DHT22 (Nhiệt độ/Độ ẩm), Sharp GP2Y10 (Bụi).
-- Cơ cấu chấp hành: Động cơ DC giảm tốc, Driver L298N.
-- Nguồn: Pin Li-ion 18650 hoặc Nguồn Adapter 5V.
-
-2. Phần mềm (Software)
-IDE: Arduino IDE (để nạp code cho mạch).
-Server: Python 3.9.13 (cài đặt các thư viện Flask).
-Database: XAMPP (Module MySQL/phpMyAdmin).
-
-⚙️ Hướng dẫn cài đặt (Installation Guide)
-Bước 1: Cấu hình Phần cứng (ESP32)
-
-1. Mở thư mục Solar_Monitoring_Project/esp32-lora.
-2. Mở file .ino bằng Arduino IDE.
-3. Cài đặt các thư viện cần thiết trong Library Manager:
-- Heltec ESP32 Dev-boards
-- Adafruit INA219
-- LoRaWan_APP
-4. Kết nối mạch Heltec V3 với máy tính và nạp code.
-
-Bước 2: Cấu hình Cơ sở dữ liệu (Database)
-
-1. Cài đặt và mở XAMPP Control Panel -> Start Apache và MySQL.
-2. Truy cập http://localhost/phpmyadmin.
-3. Tạo Database mới tên là: solar_monitoring.
-4. Import file SQL (nếu có) hoặc tạo bảng sensor_data với các cột: id, voltage, current, power, dust_density, timestamp.
-
-Bước 3: Chạy Web Server (Python)
-1. Mở terminal (CMD/VS Code) tại thư mục Solar_Monitoring_Project.
-2. Cài đặt các thư viện Python:
-```text
+## Yêu cầu hệ thống
+- Hardware: Mạch Heltec LoRa V3, Cảm biến, Động cơ, Nguồn pin.
+- Software: Python 3.9+, Arduino IDE, XAMPP.
+## Cài đặt
+1. Clone repository
+```bash
+git clone [https://github.com/VietHoang2000/Solar_Monitor_System_LoRa.git](https://github.com/VietHoang2000/Solar_Monitor_System_LoRa.git)
+cd Solar_Monitor_System_LoRa
+```
+2. Cấu hình Phần cứng (Arduino IDE)
+- Cài đặt thư viện: Heltec ESP32 Dev-boards, Adafruit INA219.
+- Mở file Solar_Monitoring_Project/esp32-lora/Solar_Node.ino.
+- Nạp code vào mạch Heltec V3.
+3. Cấu hình Database
+- Khởi động XAMPP (Start Apache & MySQL).
+- Truy cập http://localhost/phpmyadmin.
+- Tạo database tên solar_monitoring và Import file database.sql.
+4. Cài đặt Dependencies (Python)
+```bash
 pip install flask mysql-connector-python pyserial
 ```
-3. Chạy Server:
-```text
-python api_to_sql.py
+5. Chạy ứng dụng
+```bash
+cd Solar_Monitoring_Project
+python app.py
 ```
-4. Mở trình duyệt và truy cập: http://localhost:5000
+- Truy cập Dashboard: http://localhost:5000
+## 📊 Kết quả Thực nghiệm
+Hệ thống được thử nghiệm thực tế để đánh giá khả năng **xuyên thấu vật cản (Penetration Test)** của công nghệ LoRa trong môi trường đô thị mật độ cao (Urban Area).
 
-📸 Hình ảnh Demo (Screenshots)
+### 1. Kịch bản kiểm thử (Test Scenario)
+* **Khoảng cách:** 100 mét (Đường chim bay).
+* **Môi trường:** Khu dân cư, nhiều nhà cao tầng san sát.
+* **Vật cản (Obstacles):** Tín hiệu phải đi xuyên qua **3 lớp tường bê tông** và **2 dãy nhà** để đến được Gateway.
+* **Thời gian đo:** Liên tục 48 giờ (Dựa trên dữ liệu Log từ `2025-12-04` đến `2025-12-06`).
 
-👨‍💻 Tác giả (Author)
-Vũ Việt Hoàng
-MSSV: 20050032
-Khoa: Công nghệ Thông tin, Robot & AI
-Liên hệ: [Email của bạn]@gmail.com
+### 2. Đánh giá Chất lượng Kết nối (Connectivity & Penetration)
+Dựa trên Log dữ liệu thu được trong database, hệ thống hoạt động ổn định bất chấp vật cản lớn:
 
+| Thông số | Kết quả đo đạc | Đánh giá |
+| :--- | :---: | :--- |
+| **Tỷ lệ nhận gói (PDR)** | **98.5%** | Rất cao (Mất gói không đáng kể) |
+| **Chu kỳ gửi tin** | 30 giây/gói | Ổn định, không bị ngắt quãng |
+| **Khả năng xuyên thấu** | **Tốt (High)** | Tín hiệu xuyên qua 2 dãy nhà vẫn giải mã thành công |
+| **Trạng thái dữ liệu** | Nguyên vẹn | Không có hiện tượng lỗi bit hoặc sai lệch số liệu |
+
+> **Nhận xét:** Trong điều kiện có nhiều vật cản (Non-Line-of-Sight), sóng LoRa vẫn duy trì kết nối bền vững, chứng minh tính ưu việt hơn hẳn so với WiFi (thường mất tín hiệu sau 2 lớp tường).
+## 📝 Tính năng chính
+1. Web Dashboard Interface
+- Hiển thị đồng hồ đo (Gauge) trực quan.
+- Biểu đồ đường (Line Chart) theo dõi biến thiên công suất.
+- Nút điều khiển ON/OFF vệ sinh từ xa.
+2. Hệ thống Phần cứng
+- Tự động phát hiện mức độ ô nhiễm của tấm pin.
+- Cơ chế bảo vệ: Tự động dừng motor khi hoàn thành chu trình.
+- Hoạt động độc lập với nguồn dự phòng khi mất điện lưới
+## 👨‍💻 Tác giả
+Vũ Việt Hoàng 
+- MSSV: 20050032
+- Email: 20050032@student.bdu.edu.vn
+- Trường Đại học Bình Dương
