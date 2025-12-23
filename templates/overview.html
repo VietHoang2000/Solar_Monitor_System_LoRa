@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* --- Style chung cho Card --- */
+    .overview-card { background: #fff; border-radius: 15px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.3s; }
+    .overview-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .icon-box { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; }
+    .map-container { border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid #fff; }
+
+    /* --- FIX LỖI TỐI MÀU: Ghi đè style của Sidebar --- */
+    #dev_list_overview .list-group-item {
+        background-color: transparent !important; /* Xóa nền tối */
+        color: #2c3e50 !important;                /* Chữ màu đen xám */
+        border: none !important;
+        border-bottom: 1px solid #f1f2f6 !important; /* Đường kẻ mờ */
+        transition: background 0.2s;
+    }
+    #dev_list_overview .list-group-item:hover {
+        background-color: #f8f9fa !important;     /* Hover màu sáng */
+        cursor: pointer;
+    }
+    #dev_list_overview .list-group-item:last-child {
+        border-bottom: none !important;
+    }
+</style>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card overview-card p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-bold mb-1">Tổng thiết bị</h6>
+                    <h2 class="fw-bold text-dark mb-0" id="total_dev">0</h2>
+                </div>
+                <div class="icon-box bg-primary shadow-sm">
+                    <i class="fas fa-server"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card overview-card p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-bold mb-1">Đang Online</h6>
+                    <h2 class="fw-bold text-success mb-0" id="active_dev">0</h2>
+                </div>
+                <div class="icon-box bg-success shadow-sm">
+                    <i class="fas fa-wifi"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card overview-card p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted text-uppercase fw-bold mb-1">Mất kết nối</h6>
+                    <h2 class="fw-bold text-secondary mb-0" id="inactive_dev">0</h2>
+                </div>
+                <div class="icon-box bg-secondary shadow-sm">
+                    <i class="fas fa-unlink"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card overview-card h-100">
+            <div class="card-header bg-white border-0 pt-4 ps-4 pb-0">
+                <h5 class="fw-bold"><i class="fas fa-map-marked-alt text-danger me-2"></i> Bản đồ giám sát thực địa</h5>
+            </div>
+            <div class="card-body p-4">
+                <div id="map" class="map-container" style="height: 450px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card overview-card h-100">
+            <div class="card-header bg-white border-0 pt-4 ps-4 pb-0">
+                <h5 class="fw-bold"><i class="fas fa-list-ul text-primary me-2"></i> Trạng thái nhanh</h5>
+            </div>
+            <div class="card-body p-0 mt-3">
+                <ul class="list-group list-group-flush" id="dev_list_overview">
+                    <li class="list-group-item text-center p-4 text-muted">Đang tải dữ liệu...</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-0 text-center pb-4 pt-3">
+                <a href="/devices" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold">Xem tất cả</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // --- KHỞI TẠO BẢN ĐỒ ---
+    var map = L.map('map').setView([10.8231, 106.6297], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    var deviceMarkers = {};
+
+    function loadStats() {
+        $.getJSON('/api/get-stats', function(data) {
+            // Cập nhật số liệu
+            $('#total_dev').text(data.total);
+            $('#active_dev').text(data.active);
+            $('#inactive_dev').text(data.inactive);
+
+            var listHtml = '';
+            data.devices.forEach(function(d) {
+                // Tạo Badge trạng thái đẹp hơn
+                var badge = d.is_active 
+                    ? '<span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3"><i class="fas fa-circle small me-1"></i> Online</span>' 
+                    : '<span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3"><i class="fas fa-circle small me-1"></i> Offline</span>';
+                
+                // Tạo item danh sách (Đã fix lỗi màu nền)
+                listHtml += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3 text-primary d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">${d.name}</h6>
+                                <small class="text-muted" style="font-size: 0.8em;">${d.device_eui}</small>
+                            </div>
+                        </div>
+                        ${badge}
+                    </li>`;
+
+                // Logic Bản đồ (Marker)
+                if (d.location && d.location.includes(',')) {
+                    var parts = d.location.split(',');
+                    var lat = parseFloat(parts[0]);
+                    var lon = parseFloat(parts[1]);
+
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        // Icon chấm tròn màu sắc (Xanh/Xám)
+                        var markerColor = d.is_active ? "#2ecc71" : "#95a5a6";
+                        var customIcon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div style='background-color:${markerColor}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);'></div>`,
+                            iconSize: [14, 14],
+                            iconAnchor: [7, 7]
+                        });
+
+                        if (!deviceMarkers[d.device_eui]) {
+                            var marker = L.marker([lat, lon], {icon: customIcon}).addTo(map);
+                            marker.bindPopup(`<b>${d.name}</b><br>${d.is_active ? '<span class="text-success">Online</span>' : '<span class="text-muted">Offline</span>'}`);
+                            deviceMarkers[d.device_eui] = marker;
+                            
+                            // Zoom vào thiết bị đầu tiên
+                            if (Object.keys(deviceMarkers).length === 1) map.setView([lat, lon], 14);
+                        } else {
+                            var marker = deviceMarkers[d.device_eui];
+                            marker.setIcon(customIcon); // Cập nhật màu marker nếu trạng thái đổi
+                            var oldPos = marker.getLatLng();
+                            if (oldPos.lat !== lat || oldPos.lng !== lon) {
+                                marker.setLatLng([lat, lon]);
+                            }
+                        }
+                    }
+                }
+            });
+            $('#dev_list_overview').html(listHtml);
+        });
+    }
+
+    // Chạy ngay và lặp lại
+    loadStats();
+    setInterval(loadStats, 3000);
+</script>
+{% endblock %}

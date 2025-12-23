@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .ctrl-card { border: none; border-radius: 16px; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; height: 100%; transition: 0.3s; }
+    .ctrl-card:hover { transform: translateY(-3px); }
+    
+    /* Custom Toggle Switch to hơn */
+    .smart-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+    .smart-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #2196F3; }
+    input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
+    input:checked + .slider:before { transform: translateX(26px); }
+
+    .device-icon { font-size: 40px; margin-bottom: 15px; color: #95a5a6; transition: 0.3s; }
+    .active-device .device-icon { color: #2196F3; transform: scale(1.1); }
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h3 class="fw-bold">Trung tâm Điều khiển</h3>
+        <p class="text-muted">Gửi lệnh điều khiển xuống thiết bị qua LoRaWAN Class C</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card ctrl-card p-4 text-center" id="card_pump">
+            <div class="device-icon"><i class="fas fa-water"></i></div>
+            <h5 class="fw-bold">Máy Bơm Nước</h5>
+            <p class="text-muted small mb-4">Hệ thống cấp nước vệ sinh</p>
+            
+            <div class="d-flex justify-content-center align-items-center gap-3">
+                <span class="fw-bold text-muted" id="lbl_pump">OFF</span>
+                <label class="smart-switch">
+                    <input type="checkbox" id="sw_pump">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card ctrl-card p-4 text-center" id="card_brush">
+            <div class="device-icon"><i class="fas fa-broom"></i></div>
+            <h5 class="fw-bold">Chổi Quét</h5>
+            <p class="text-muted small mb-4">Motor lau bề mặt tấm pin</p>
+            
+            <div class="d-flex justify-content-center align-items-center gap-3">
+                <span class="fw-bold text-muted" id="lbl_brush">OFF</span>
+                <label class="smart-switch">
+                    <input type="checkbox" id="sw_brush">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 col-lg-4">
+        <div class="card ctrl-card p-4 bg-light border">
+            <h6 class="fw-bold text-muted mb-4">CHỨC NĂNG HỆ THỐNG</h6>
+            
+            <button class="btn btn-outline-success w-100 mb-3 py-2 fw-bold" onclick="sendCommand('auto_on')">
+                <i class="fas fa-robot me-2"></i> BẬT CHẾ ĐỘ TỰ ĐỘNG
+            </button>
+            
+            <button class="btn btn-danger w-100 py-3 fw-bold shadow-sm" onclick="sendCommand('stop')">
+                <i class="fas fa-power-off me-2"></i> DỪNG KHẨN CẤP (STOP)
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Logic gửi lệnh
+    function sendCommand(cmd) {
+        $.ajax({
+            url: '/api/control', type: 'POST', contentType: 'application/json',
+            data: JSON.stringify({ "device_eui": "d7a92b1f77ced2e0", "command": cmd }),
+            success: function() { updateStatus(); }
+        });
+    }
+
+    // Xử lý sự kiện Switch
+    $('#sw_pump').change(function() { sendCommand(this.checked ? 'pump_on' : 'pump_off'); });
+    $('#sw_brush').change(function() { sendCommand(this.checked ? 'brush_on' : 'brush_off'); });
+
+    // Đồng bộ trạng thái
+    function updateStatus() {
+        $.getJSON('/api/get-latest-data', function(data) {
+            // Pump
+            if(data.pump_status) {
+                $('#card_pump').addClass('active-device');
+                $('#sw_pump').prop('checked', true);
+                $('#lbl_pump').text('ON').addClass('text-primary');
+            } else {
+                $('#card_pump').removeClass('active-device');
+                $('#sw_pump').prop('checked', false);
+                $('#lbl_pump').text('OFF').removeClass('text-primary');
+            }
+            // Brush (Dùng motor_status)
+            if(data.motor_status) {
+                $('#card_brush').addClass('active-device');
+                $('#sw_brush').prop('checked', true);
+                $('#lbl_brush').text('ON').addClass('text-primary');
+            } else {
+                $('#card_brush').removeClass('active-device');
+                $('#sw_brush').prop('checked', false);
+                $('#lbl_brush').text('OFF').removeClass('text-primary');
+            }
+        });
+    }
+    setInterval(updateStatus, 2000);
+</script>
+{% endblock %}
