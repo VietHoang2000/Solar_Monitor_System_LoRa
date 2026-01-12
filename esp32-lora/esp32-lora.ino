@@ -70,7 +70,7 @@ float ina219Reading_mA   = 23.0;
 float extMeterReading_mA = 22.65;  
 
 //====================== HẰNG SỐ & BIẾN =========================
-const float DUST_THRESHOLD    = 100.0;   // µg/m3
+const float DUST_THRESHOLD    = 50.0;   // µg/m3
 
 float prevDust  = 0;
 bool  needClean        = false;
